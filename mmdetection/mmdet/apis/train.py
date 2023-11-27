@@ -196,7 +196,7 @@ def train_detector(model,
         cfg.log_config,
         cfg.get('momentum_config', None),
         custom_hooks_config=cfg.get('custom_hooks', None))
-    # runner.register_hook(SetMseWeightHook(train_loader_cfg), priority='LOW')
+    runner.register_hook(SetMseWeightHook(train_loader_cfg), priority='LOW')
 
     if distributed:
         if isinstance(runner, EpochBasedRunner):
