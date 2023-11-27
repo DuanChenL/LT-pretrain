@@ -132,7 +132,7 @@ class TwoStageDetector(BaseDetector):
             loss_weight=0.6)
         self.loss_mse = build_loss(loss_mse)
 
-        with open('./oln_bbox.json', 'r') as file:
+        with open('oln_bbox.json', 'r') as file:
             ss_boxes = json.load(file)
         self.ss_boxes = ss_boxes
 
