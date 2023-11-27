@@ -1,0 +1,27 @@
+_base_ = [
+    '../_base_/models/mask_rcnn_r50_fpn.py',
+    # '../_base_/datasets/ssl_lvis_v0.5_instance.py',
+    '../_base_/datasets/lvis_v0.5_instance_ssl.py',
+    '../_base_/schedules/schedule_4x.py', '../_base_/default_runtime.py'
+]
+
+model = dict(
+    neck=dict(
+        type='FPN'
+        ),
+    roi_head=dict(
+        type='SSLRoIHead',
+        # type='StandardRoIHead',
+        bbox_head=dict(
+                        # type='Shared2FCBBoxHead',
+                        type='SSLShared2FCBBoxHead',
+                       num_classes=1230),
+        mask_head=dict(num_classes=1230)),
+    test_cfg=dict(
+        rcnn=dict(
+            score_thr=0.0001,
+            # LVIS allows up to 300
+            max_per_img=300)))
+
+evaluation = dict(interval=999, metric=[])
+find_unused_parameters = True
