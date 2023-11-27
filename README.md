@@ -54,6 +54,7 @@ data
 resnet-50-FPN训练24 epochs命令：
 ~~~
 
+cd baseline/
 ./sh_files/r50_2x.sh 
 
 ~~~
