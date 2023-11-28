@@ -10,7 +10,6 @@ We tested our codebase on mmdet 2.25.3, mmcv 1.6.1, PyTorch 1.12.0, torchvision 
 To setup the code, please follow the commands below:
 
 ~~~
-
 # Install mmcv.
 pip install -U openmim
 mim install mmcv-full==1.6.1
@@ -38,4 +37,20 @@ data
   │   │   ├── ......
   │   ├── val2017
   │   ├── test2017
+~~~
+将"baseline\configs\\\_base_\\datasets\lvis_v1_instance_ssl.py"中的data_root修改为对应地址即可
+
+### Training
+下载用于自监督训练的目标框文件"oln_bbox.json"，将其放入"baseline/"目录下：
+
+链接：https://pan.baidu.com/s/1Z7j4y1bs7jjDhvIx33xV2g?pwd=g40e 
+
+提取码：g40e 
+
+
+
+resnet-50-FPN训练24 epochs命令：
+~~~
+cd baseline/
+./sh_files/r50_2x.sh 
 ~~~
