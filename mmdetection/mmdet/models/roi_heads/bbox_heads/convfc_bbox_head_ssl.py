@@ -139,27 +139,6 @@ class SSLConvFCBBoxHead(BBoxHead):
                            self.num_classes)
             self.fc_reg = nn.Linear(self.reg_last_dim, out_dim_reg)
 
-        # self.compute_mv = nn.Linear(1024, 2 * 50)
-        # self.decoder_fc = nn.Linear(50, 7 * 7 * 256)
-        # self.decoder = nn.Sequential(
-        #     nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1),
-        #     nn.ReLU(),
-        #     nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1),
-        #     nn.ReLU(),
-        #     nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1),
-        #     # nn.Sigmoid()
-        # )
-        # loss_mse = dict(
-        #     type='MSELoss',
-        #     loss_weight=1.0)
-        # self.loss_mse = build_loss(loss_mse)
-        # with open('/data1/PycharmProjects/dcl/long-tail-detection/baseline/cat2fre_v1.json', 'r') as file:
-        # with open('/data/duancl/ssl_LT_detection/baseline/cat2fre.json', 'r') as file:
-            # cat2fre = json.load(file)
-        # self.cat2fre = cat2fre
-        # self.reweight_ = nn.Linear(self.cls_last_dim, 256)
-        # self.reweight_fc = nn.Linear(256, 256 * (self.num_classes + 1))
-
     def _add_conv_fc_branch(self,
                             num_branch_convs,
                             num_branch_fcs,
@@ -277,13 +256,6 @@ class SSLConvFCBBoxHead(BBoxHead):
             for fc in self.shared_fcs:
                 x = self.relu(fc(x))
 
-        # reconstruct = x
-        # mv = self.compute_mv(reconstruct)
-        # self.mean, self.logvar = mv[:, :50], mv[:, 50:]
-        # z = self.reparameterize(self.mean, self.logvar)
-        # z = self.decoder_fc(z).view(reconstruct.size(0), 256, 7, 7)
-        # self.outputs = self.decoder(z)
-
         if len(y) == 4:
             x_2 = y[1]
             x_sim = y[2]
@@ -346,18 +318,6 @@ class SSLConvFCBBoxHead(BBoxHead):
 
             self._dequeue_and_enqueue(k)
             self._dequeue_and_enqueue(k_2)
-            # with torch.no_grad():
-            #     x_cls_ss = x_2
-            #     for conv in self.cls_convs:
-            #         x_cls_ss = conv(x_cls_ss)
-            #     if x_cls_ss.dim() > 2:
-            #         if self.with_avg_pool:
-            #             x_cls_ss = self.avg_pool(x_cls_ss)
-            #         x_cls_ss = x_cls_ss.flatten(1)
-            #     for fc in self.cls_fcs:
-            #         x_cls_ss = self.relu(fc(x_cls_ss))
-            #
-            #     cls_score_ss = self.fc_cls(x_cls_ss) if self.with_cls else None
 
         # separate branches
         x_cls = x

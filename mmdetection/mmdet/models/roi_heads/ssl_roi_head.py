@@ -175,38 +175,6 @@ class SSLRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
 
         bbox_targets = self.bbox_head.get_targets(sampling_results, gt_bboxes,
                                                   gt_labels, self.train_cfg)
-        # gt_bboxes_imgs = []
-        # sampling_gt_labels = []
-        # sampling_pos_bboxes = []
-        # sampling_pos_inds = []
-        # for samp_res in sampling_results:
-        #     sampling_pos_bboxes.append(samp_res.bboxes)
-        #     sampling_gt_labels.append(samp_res.pos_gt_labels)
-        #     sampling_pos_inds.append(samp_res.pos_inds)
-        # for i in range(len(imgs)):
-        #     gt_bboxes_img = []
-        #     for bbox in sampling_pos_bboxes[i]:
-        #         a, b, c, d = int(bbox[0] + 0.5), int(bbox[2] + 0.5), int(bbox[1] + 0.5), int(bbox[3] + 0.5)
-        #         # a = min(a, b - 1, 0)
-        #         # c = min(c, d - 1, 0)
-        #         # b = max(b, a + 1, imgs[i].shape[-1])
-        #         # d = max(d, c + 1, imgs[i].shape[-2])
-        #         if d == c:
-        #             if c == 0:
-        #                 d = c + 1
-        #             else:
-        #                 c = d - 1
-        #         if a == b:
-        #             if a == 0:
-        #                 b = a + 1
-        #             else:
-        #                 a = b - 1
-        #         ori_bbox = torch.nn.functional.interpolate(imgs[i, :, c:d, a:b].unsqueeze(0), size=(56, 56),
-        #                                         mode='bilinear').squeeze()
-        #         # if len(ori_bbox) != 0:
-        #         gt_bboxes_img.append(ori_bbox)
-        #     # if gt_bboxes_img is not []:
-        #     gt_bboxes_imgs.append(torch.stack(gt_bboxes_img))
         loss_bbox = self.bbox_head.loss(bbox_results['cls_score'],
                                         bbox_results['bbox_pred'],
                                         bbox_results['ssl_logits'],

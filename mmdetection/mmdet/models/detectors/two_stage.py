@@ -132,7 +132,7 @@ class TwoStageDetector(BaseDetector):
             loss_weight=0.6)
         self.loss_mse = build_loss(loss_mse)
 
-        with open('./oln_bbox.json', 'r') as file:
+        with open('oln_bbox.json', 'r') as file:
             ss_boxes = json.load(file)
         self.ss_boxes = ss_boxes
 
@@ -221,10 +221,21 @@ class TwoStageDetector(BaseDetector):
             x = self.neck_sim(x)
         return x
 
+    def generate_mask(self, probability, shape):
+        mask = torch.rand(shape)
+        mask = (mask < probability).type(torch.float32)
+        return mask
+
     def self_consistency_ae(self, feat, ori_img):
         output = self.decoder(feat)
-        _, feat_hat = self.extract_feat(output, return_feat=True)
-        loss_mse = 1.0 * self.loss_mse(feat_hat, feat) + 0.1 * self.loss_mse(output, ori_img)
+        # 生成掩码
+        probability = 0.3
+        mask = self.generate_mask(probability, output.shape[2:]).cuda()
+
+        # 对图像进行遮挡
+        masked_output = output * mask.unsqueeze(0)
+        _, feat_hat = self.extract_feat(masked_output, return_feat=True)
+        loss_mse = 1.0 * self.loss_mse(feat_hat, feat) + 0.2 * self.loss_mse(output, ori_img)
         return loss_mse
 
     def forward_dummy(self, img):
@@ -343,10 +354,6 @@ class TwoStageDetector(BaseDetector):
         for i in range(len(selective_search_proposal['view0'])):
             for bbox in selective_search_proposal['view0'][i]:
                 a, b, c, d = int(bbox[0] + 0.5), int(bbox[2] + 0.5), int(bbox[1] + 0.5), int(bbox[3] + 0.5)
-                # a = min(a, b - 1, 0)
-                # c = min(c, d - 1, 0)
-                # b = max(b, a + 1, imgs[i].shape[-1])
-                # d = max(d, c + 1, imgs[i].shape[-2])
                 if d == c:
                     if c == 0:
                         d = c + 1
@@ -363,12 +370,10 @@ class TwoStageDetector(BaseDetector):
                 bbox_img.append(ori_bbox_resize)
         bbox_img = torch.stack(bbox_img)
         _, feat_bbox = self.extract_feat(bbox_img, return_feat=True)
-        # output = self.decoder(feat)
-        # output_bbox = self.decoder(feat_bbox)
-        loss_mse = 0.2 * self.self_consistency_ae(feat, img[0]) + self.self_consistency_ae(feat_bbox, bbox_img)
-        # loss_mse = 0.2 * self.loss_mse(output, img[0]) + self.loss_mse(output_bbox, bbox_img)
 
-        x_g = torch.Tensor(x[-1].mean(-1).mean(-1))
+        loss_mse = 0.2 * self.self_consistency_ae(feat, img[0]) + self.self_consistency_ae(feat_bbox, bbox_img)
+
+        x_g = torch.Tensor(x[-1].mean(-1).mean(-1).cpu()).to(device)
         q = self.proj_q(x_g)
         q = nn.functional.normalize(q, dim=1)
         with torch.no_grad():
@@ -377,7 +382,7 @@ class TwoStageDetector(BaseDetector):
             x_bbox_sim = self.extract_sim_feat(img_2)
             view1 = x_bbox_sim
             view2 = self.extract_sim_feat(view2)
-            x_sim_g_4 = torch.Tensor(x_bbox_sim[-1].mean(-1).mean(-1))
+            x_sim_g_4 = torch.Tensor(x_bbox_sim[-1].mean(-1).mean(-1).cpu()).to(device)
             k = x_sim_g_4
             k = self.proj_k(k)
             k = torch.nn.functional.normalize(k, dim=1)
