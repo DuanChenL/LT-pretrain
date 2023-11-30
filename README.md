@@ -54,3 +54,16 @@ resnet-50-FPN训练24 epochs命令：
 cd baseline/
 ./sh_files/r50_2x.sh 
 ~~~
+
+### Finetune
+提取预训练的backbone：
+~~~
+cd baseline/
+python get_backbone.py
+~~~
+
+利用该模型进行finetune（采用ECM loss）
+~~~
+cd baseline/
+bash ./tools/dist_train.sh ./configs/effective_class_margin_loss/r50_ecm_1x.py 4
+~~~
