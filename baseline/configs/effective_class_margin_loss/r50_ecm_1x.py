@@ -16,8 +16,9 @@ model = dict(
                 num_classes=1203,
                 loss_weight=1.0, 
                 )),
-        mask_head=dict(num_classes=1203, 
-                       predictor_cfg=dict(type='NormedConv2d', tempearture=20))),
+        mask_head=dict(num_classes=1203,
+                       # predictor_cfg=dict(type='NormedConv2d', tempearture=20)
+                       )),
     test_cfg=dict(
         rcnn=dict(
             score_thr=0.0001,
@@ -42,7 +43,6 @@ train_pipeline = [
     dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
 ]
 
-
 # optimizer
 optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=5, norm_type=2)) # detectron2 default.
@@ -55,8 +55,10 @@ lr_config = dict(
     step=[8, 11])
 runner = dict(type='EpochBasedRunner', max_epochs=12)
 
-
-data = dict(train=dict(dataset=dict(pipeline=train_pipeline)))
+load_from = './backbone.pth'
+data = dict(samples_per_gpu=4,
+            workers_per_gpu=4,
+            train=dict(dataset=dict(pipeline=train_pipeline)))
 evaluation = dict(interval=12, metric=['bbox', 'segm'])
 
 
